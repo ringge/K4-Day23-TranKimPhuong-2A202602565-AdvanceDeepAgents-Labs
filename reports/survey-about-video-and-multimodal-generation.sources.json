@@ -1,0 +1,90 @@
+[
+  {
+    "n": 1,
+    "id": "2405.03150",
+    "url": "https://arxiv.org/abs/2405.03150",
+    "title": "Video Diffusion Models: A Survey",
+    "date": "2024-11-17",
+    "source": "arxiv"
+  },
+  {
+    "n": 2,
+    "id": "10.1007/s10462-025-11331-6",
+    "url": "https://link.springer.com/article/10.1007/s10462-025-11331-6",
+    "title": "Video Diffusion generation: comprehensive review and open problems",
+    "date": "2025-08-20",
+    "source": "web"
+  },
+  {
+    "n": 3,
+    "id": "2401.01827",
+    "url": "https://huggingface.co/papers/2401.01827",
+    "title": "Moonshot: Towards Controllable Video Generation and Editing with Multimodal Conditions",
+    "date": "2024-01-03",
+    "source": "hf-search"
+  },
+  {
+    "n": 4,
+    "id": "2309.16496",
+    "url": "https://huggingface.co/papers/2309.16496",
+    "title": "CCEdit: Creative and Controllable Video Editing via Diffusion Models",
+    "date": "2023-09-28",
+    "source": "hf-search"
+  },
+  {
+    "n": 5,
+    "id": "2502.03207",
+    "url": "https://huggingface.co/papers/2502.03207",
+    "title": "MotionAgent: Fine-grained Controllable Video Generation via Motion Field Agent",
+    "date": "2025-02-05",
+    "source": "hf-search"
+  },
+  {
+    "n": 6,
+    "id": "2507.16869",
+    "url": "https://huggingface.co/papers/2507.16869",
+    "title": "Controllable Video Generation: A Survey",
+    "date": "2025-07-22",
+    "source": "hf-search"
+  },
+  {
+    "n": 7,
+    "id": "FACTOR WACV 2025",
+    "url": "https://openaccess.thecvf.com/content/WACV2025/papers/Huang_Fine-Grained_Controllable_Video_Generation_via_Object_Appearance_and_Context_WACV_2025_paper.pdf",
+    "title": "FACTOR: Fine-Grained Controllable Video Generation via Object Appearance and Context",
+    "date": "",
+    "source": "web"
+  },
+  {
+    "n": 8,
+    "id": "2412.15220",
+    "url": "https://arxiv.org/pdf/2412.15220",
+    "title": "SyncFlow: Synchronized Video and Audio Generation with Flow Matching",
+    "date": "",
+    "source": "web"
+  },
+  {
+    "n": 9,
+    "id": "2510.01284",
+    "url": "https://arxiv.org/abs/2510.01284",
+    "title": "Ovi: Twin backbone cross-modal fusion for audio-video generation",
+    "date": "2025-09-30",
+    "source": "hf-search"
+  },
+  {
+    "n": 10,
+    "id": "2512.13677",
+    "url": "https://huggingface.co/papers/2512.13677",
+    "title": "JoVA: Unified Multimodal Learning for Joint Video-Audio Generation",
+    "date": "2025-12-15",
+    "source": "hf-search"
+  },
+  {
+    "n": 11,
+    "id": "2409.17692v3",
+    "url": "https://arxiv.org/abs/2409.17692v3",
+    "title": "MIO: A Foundation Model on Multimodal Tokens",
+    "date": "2025-01-13",
+    "source": "web"
+  }
+]

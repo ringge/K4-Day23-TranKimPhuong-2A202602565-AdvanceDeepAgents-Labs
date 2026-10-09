@@ -1,0 +1,74 @@
+[
+  {
+    "n": 1,
+    "id": "2404.04759",
+    "url": "https://huggingface.co/papers/2404.04759",
+    "title": "What Happens When Small Is Made Smaller? Exploring the Impact of Compression on Small Data Pretrained Language Models",
+    "date": "2024-04-06",
+    "source": "hf-search"
+  },
+  {
+    "n": 2,
+    "id": "2410.20011",
+    "url": "https://arxiv.org/html/2410.20011v1",
+    "title": "A Survey of Small Language Models",
+    "date": "2024-10-25",
+    "source": "web"
+  },
+  {
+    "n": 3,
+    "id": "2025.acl-long.718",
+    "url": "https://aclanthology.org/anthology-files/anthology-files/pdf/acl/2025.acl-long.718.pdf",
+    "title": "Demystifying Small Language Models for Edge Deployment",
+    "date": "",
+    "source": "web"
+  },
+  {
+    "n": 4,
+    "id": "2505.19433",
+    "url": "https://arxiv.org/abs/2505.19433",
+    "title": "Can Compressed LLMs Truly Act? An Empirical Evaluation of Agentic Capabilities in LLM Compression",
+    "date": "2025-05-26",
+    "source": "arxiv"
+  },
+  {
+    "n": 5,
+    "id": "2309.06180",
+    "url": "https://arxiv.org/pdf/2309.06180",
+    "title": "Efficient Memory Management for Large Language Model Serving with PagedAttention",
+    "date": "2023-09-12",
+    "source": "web"
+  },
+  {
+    "n": 6,
+    "id": "2023-06-20-vllm",
+    "url": "https://vllm.ai/blog/2023-06-20-vllm",
+    "title": "vLLM: Easy, Fast, and Cheap LLM Serving with PagedAttention",
+    "date": "2023-06-20",
+    "source": "web"
+  },
+  {
+    "n": 7,
+    "id": "2408.04413",
+    "url": "https://arxiv.org/html/2408.04413",
+    "title": "Deeploy: Enabling Energy-Efficient Deployment of Small Language Models On Heterogeneous Microcontrollers",
+    "date": "",
+    "source": "web"
+  },
+  {
+    "n": 8,
+    "id": "2401.05391",
+    "url": "https://huggingface.co/papers/2401.05391",
+    "title": "Efficient LLM inference solution on Intel GPU",
+    "date": "2023-12-19",
+    "source": "hf-search"
+  },
+  {
+    "n": 9,
+    "id": "MLPerf Tiny v1.4 results page",
+    "url": "https://mlcommons.org/2026/07/mlperf-tiny-v1-4-results/",
+    "title": "MLPerf Tiny: Benchmarking AI at the Edge",
+    "date": "2026-07-07",
+    "source": "web"
+  }
+]

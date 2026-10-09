@@ -1,0 +1,25 @@
+{
+  "topic": "survey about efficient inference and small language models",
+  "model": "gpt-6-luna",
+  "elapsed_s": 386.1,
+  "subagent_calls": 4,
+  "tool_calls": {
+    "write_todos": 2,
+    "ls": 1,
+    "task": 4,
+    "read_file": 5,
+    "write_file": 2,
+    "edit_file": 5,
+    "execute": 5
+  },
+  "tokens": {
+    "input": 279709,
+    "output": 5218
+  },
+  "n_sources": 9,
+  "source_families": [
+    "arxiv",
+    "hf-search",
+    "web"
+  ]
+}

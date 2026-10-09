@@ -1,0 +1,74 @@
+[
+  {
+    "n": 1,
+    "id": "2406.05804",
+    "url": "https://arxiv.org/html/2406.05804",
+    "title": "A Review of Prominent Paradigms for LLM-Based Agents: Tool Use (Including RAG), Planning, and Feedback Learning",
+    "date": "",
+    "source": "web"
+  },
+  {
+    "n": 2,
+    "id": "2210.03629",
+    "url": "https://huggingface.co/papers/2210.03629",
+    "title": "ReAct: Synergizing Reasoning and Acting in Language Models",
+    "date": "2022-10-06",
+    "source": "hf-search"
+  },
+  {
+    "n": 3,
+    "id": "2304.08244",
+    "url": "https://arxiv.org/abs/2304.08244",
+    "title": "API-Bank: A Comprehensive Benchmark for Tool-Augmented LLMs",
+    "date": "2023-04-17",
+    "source": "web"
+  },
+  {
+    "n": 4,
+    "id": "2403.07714",
+    "url": "https://arxiv.org/pdf/2403.07714v5.pdf",
+    "title": "StableToolBench: Towards Stable Large-Scale Benchmarking on Tool Learning of Large Language Models",
+    "date": "2024-03-12",
+    "source": "hf-search"
+  },
+  {
+    "n": 5,
+    "id": "2504.08942",
+    "url": "https://huggingface.co/papers/2504.08942",
+    "title": "AgentRewardBench: Evaluating Automatic Evaluations of Web Agent Trajectories",
+    "date": "2025-04-11",
+    "source": "hf-search"
+  },
+  {
+    "n": 6,
+    "id": "2602.10453v1",
+    "url": "https://arxiv.org/html/2602.10453v1",
+    "title": "The Landscape of Prompt Injection Threats in LLM Agents: From Taxonomy to Analysis",
+    "date": "2026-02-11",
+    "source": "web"
+  },
+  {
+    "n": 7,
+    "id": "2412.14470",
+    "url": "https://arxiv.org/abs/2412.14470",
+    "title": "Agent-SafetyBench: Evaluating the Safety of LLM Agents",
+    "date": "",
+    "source": "web"
+  },
+  {
+    "n": 8,
+    "id": "2601.10156",
+    "url": "https://huggingface.co/papers/2601.10156",
+    "title": "ToolSafe: Enhancing Tool Invocation Safety of LLM-based agents via Proactive Step-level Guardrail and Feedback",
+    "date": "2026-01-15",
+    "source": "hf-search"
+  },
+  {
+    "n": 9,
+    "id": "2610.06406",
+    "url": "https://huggingface.co/papers/2610.06406",
+    "title": "What Did the Agent Actually Do? Evidence-Grounded Oversight for Long-Horizon Agents",
+    "date": "2026-10-05",
+    "source": "hf-daily"
+  }
+]

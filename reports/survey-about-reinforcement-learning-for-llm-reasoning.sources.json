@@ -1,0 +1,90 @@
+[
+  {
+    "n": 1,
+    "id": "2501.12948v2",
+    "url": "https://arxiv.org/abs/2501.12948v2",
+    "title": "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning",
+    "date": "",
+    "source": "web"
+  },
+  {
+    "n": 2,
+    "id": "2509.08827",
+    "url": "https://arxiv.org/abs/2509.08827",
+    "title": "A Survey of Reinforcement Learning for Large Reasoning Models",
+    "date": "",
+    "source": "web"
+  },
+  {
+    "n": 3,
+    "id": "2506.14965",
+    "url": "https://huggingface.co/papers/2506.14965",
+    "title": "Revisiting Reinforcement Learning for LLM Reasoning from A Cross-Domain Perspective",
+    "date": "2025-06-17",
+    "source": "hf-search"
+  },
+  {
+    "n": 4,
+    "id": "537d5aa768c2d534016a4d06f87bc8fb",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2025/file/537d5aa768c2d534016a4d06f87bc8fb-Paper-Conference.pdf",
+    "title": "Does Reinforcement Learning Really Incentivize Reasoning Capacity in LLMs Beyond the Base Model?",
+    "date": "",
+    "source": "web"
+  },
+  {
+    "n": 5,
+    "id": "2501.08156v5",
+    "url": "https://arxiv.org/abs/2501.08156v5",
+    "title": "Are DeepSeek R1 And Other Reasoning Models More Faithful?",
+    "date": "2025-07-15",
+    "source": "web"
+  },
+  {
+    "n": 6,
+    "id": "s41586-025-09422-z",
+    "url": "https://www.nature.com/articles/s41586-025-09422-z",
+    "title": "DeepSeek-R1 incentivizes reasoning in LLMs through reinforcement learning",
+    "date": "2025-09-17",
+    "source": "web"
+  },
+  {
+    "n": 7,
+    "id": "2511.20718",
+    "url": "https://arxiv.org/abs/2511.20718",
+    "title": "Stabilizing Off-Policy Training for Long-Horizon LLM Agent via Turn-Level Importance Sampling and Clipping-Triggered Normalization",
+    "date": "2025-11-25",
+    "source": "arxiv"
+  },
+  {
+    "n": 8,
+    "id": "2511.14846",
+    "url": "https://arxiv.org/abs/2511.14846",
+    "title": "Empowering Multi-Turn Tool-Integrated Agentic Reasoning with Group Turn Policy Optimization",
+    "date": "2025-11-18",
+    "source": "arxiv"
+  },
+  {
+    "n": 9,
+    "id": "2509.25300",
+    "url": "https://arxiv.org/html/2509.25300v4",
+    "title": "Scaling Behaviors of LLM Reinforcement Learning Post-Training",
+    "date": "",
+    "source": "web"
+  },
+  {
+    "n": 10,
+    "id": "2501.17030",
+    "url": "https://arxiv.org/abs/2501.17030",
+    "title": "Challenges in Ensuring AI Safety in DeepSeek-R1 Models: The Shortcomings of Reinforcement Learning Strategies",
+    "date": "2025-01-28",
+    "source": "web"
+  },
+  {
+    "n": 11,
+    "id": "2505.20087",
+    "url": "https://huggingface.co/papers/2505.20087",
+    "title": "Safety Through Reasoning: An Empirical Study of Reasoning Guardrail Models",
+    "date": "2025-05-26",
+    "source": "hf-search"
+  }
+]

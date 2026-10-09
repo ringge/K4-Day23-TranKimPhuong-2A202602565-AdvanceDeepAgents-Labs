@@ -11,6 +11,9 @@ Try your tools without any agent:   python tools.py
 import json  # noqa: F401
 import os  # noqa: F401
 import time  # noqa: F401
+import random
+import re
+import threading
 import xml.etree.ElementTree  # noqa: F401  (arXiv answers with Atom XML)
 
 import httpx  # noqa: F401
@@ -35,34 +38,116 @@ class RetryableError(Exception):
 def with_retry(fn, *, attempts=5, base=1.0, cap=30.0):
     """Call fn(); when it raises RetryableError, wait and call it again.
 
-    PSEUDO-CODE:
-      for attempt in 0 .. attempts-1:
-          try: return fn()
-          except RetryableError as e:
-              if this was the last attempt: raise
-              delay = e.retry_after if the server told us, else exponential backoff base * 2**attempt
-              cap the delay at `cap` seconds; add random jitter to the exponential case
-              sleep(delay)
-    Use it to wrap EVERY network call below. Also treat these as retryable: HTTP 429/500/502/503/504,
-    httpx.TransportError (timeouts, connection resets). Read the Retry-After header when present.
+    Retry transient HTTP statuses (429/500/502/503/504), transport failures,
+    and RetryableError. Honor numeric Retry-After; otherwise use capped
+    exponential backoff with jitter. Other exceptions propagate immediately.
     """
-    raise NotImplementedError("TODO 1: with_retry")
+    if attempts < 1:
+        raise ValueError("attempts must be at least 1")
+    for attempt in range(attempts):
+        try:
+            return fn()
+        except (RetryableError, httpx.TransportError, httpx.HTTPStatusError) as exc:
+            retry_after = None
+            if isinstance(exc, httpx.HTTPStatusError):
+                if exc.response.status_code not in {429, 500, 502, 503, 504}:
+                    raise
+                header = exc.response.headers.get("Retry-After")
+                if header is not None:
+                    try:
+                        retry_after = float(header)
+                    except ValueError:
+                        pass
+            elif isinstance(exc, RetryableError):
+                retry_after = exc.retry_after
+            if attempt == attempts - 1:
+                raise
+            delay = (retry_after if retry_after is not None
+                     else base * 2**attempt + random.uniform(0, base))
+            time.sleep(max(0.0, min(cap, delay)))
 
+
+_arxiv_lock = threading.Lock()
+_arxiv_last_call = None
 
 # ---- TODO 2: arXiv ----
 @tool
 def arxiv_search(query: str, max_results: int = 10) -> str:
     """Search arXiv papers by keywords, newest first. Returns a JSON list of {id, url, published, title, summary}."""
-    # PSEUDO-CODE:
-    #   keep only word characters of `query` -> terms; no terms -> "NO RESULTS" (do not call the network)
-    #   respect arXiv etiquette: at least 3 seconds between two arXiv calls (remember the time of the last call)
-    #   GET ARXIV_URL params: search_query="all:t1 AND all:t2 ...", sortBy=submittedDate, sortOrder=descending,
-    #       max_results=clamp(max_results, 1, 30)           (wrap in with_retry)
-    #   parse the Atom XML: each <entry> -> {id (last part of <id> after /abs/), url, published[:10], title, summary}
-    #       collapse whitespace/newlines in title and summary; cut summary to ~600 chars
-    #   no entries -> "NO RESULTS"; else json.dumps(records, ensure_ascii=False)
-    #   any exception -> "ERROR: <type>: <message>"
-    raise NotImplementedError("TODO 2: arxiv_search")
+    global _arxiv_last_call
+    try:
+        terms = re.findall(r"[^\W_]+(?:-[^\W_]+)*", query)
+        terms = [term for term in terms if term.upper() not in {"AND", "OR", "NOT"}]
+        if not terms:
+            return "NO RESULTS"
+        params = {
+            "search_query": " AND ".join(f"all:{term}" for term in terms),
+            "sortBy": "submittedDate",
+            "sortOrder": "descending",
+            "start": 0,
+            "max_results": max(1, min(30, max_results)),
+        }
+
+        def fetch():
+            global _arxiv_last_call
+            with _arxiv_lock:
+                if _arxiv_last_call is not None:
+                    delay = 3.0 - (time.monotonic() - _arxiv_last_call)
+                    if delay > 0:
+                        time.sleep(delay)
+                _arxiv_last_call = time.monotonic()
+                response = httpx.get(ARXIV_URL, params=params, timeout=30.0)
+            response.raise_for_status()
+            return response
+
+        response = with_retry(fetch, attempts=7, cap=60.0)
+        root = xml.etree.ElementTree.fromstring(response.text)
+        ns = {"atom": "http://www.w3.org/2005/Atom"}
+        records = []
+        for entry in root.findall("atom:entry", ns):
+            paper_id = entry.findtext("atom:id", default="", namespaces=ns).split("/abs/")[-1]
+            paper_id = re.sub(r"v\d+$", "", paper_id)
+            records.append({
+                "id": paper_id,
+                "url": f"https://arxiv.org/abs/{paper_id}",
+                "published": entry.findtext("atom:published", default="", namespaces=ns)[:10],
+                "title": " ".join(entry.findtext("atom:title", default="", namespaces=ns).split()),
+                "summary": " ".join(entry.findtext("atom:summary", default="", namespaces=ns).split())[:600],
+            })
+        return json.dumps(records, ensure_ascii=False) if records else "NO RESULTS"
+    except Exception as exc:
+        return f"ERROR: {type(exc).__name__}: {exc}"
+
+
+def _hf_records(url, params, *, keyword="", prefer_ai=False):
+    def fetch():
+        response = httpx.get(url, params=params, timeout=30.0)
+        response.raise_for_status()
+        return response.json()
+
+    records = []
+    for item in with_retry(fetch):
+        paper = item.get("paper") or {}
+        paper_id = paper.get("id")
+        if not paper_id:
+            continue
+        title = " ".join((paper.get("title") or item.get("title") or "").split())
+        summary = ((paper.get("ai_summary") if prefer_ai else None)
+                   or paper.get("summary") or item.get("summary") or "")
+        summary = " ".join(summary.split())
+        if keyword and keyword.casefold() not in (title + " " + summary).casefold():
+            continue
+        records.append({
+            "id": paper_id,
+            "url": f"https://huggingface.co/papers/{paper_id}",
+            "published": (paper.get("publishedAt") or item.get("publishedAt") or "")[:10],
+            "title": title,
+            "summary": summary[:600],
+            "upvotes": paper.get("upvotes") or 0,
+            "github": paper.get("githubRepo") or "",
+            "stars": paper.get("githubStars") or 0,
+        })
+    return records
 
 
 # ---- TODO 3: Hugging Face ----
@@ -71,46 +156,108 @@ def hf_daily_papers(limit: int = 30, date: str = "", keyword: str = "") -> str:
     """Hugging Face Daily Papers = what is trending in AI research. Returns a JSON list of
     {id, url, published, title, summary, upvotes, github, stars} sorted by upvotes. `date` is YYYY-MM-DD (empty = latest).
     `keyword` filters title/summary; there is no topic search on this endpoint (use hf_search_papers for a topic)."""
-    # PSEUDO-CODE:
-    #   GET HF_DAILY_URL params: limit (clamp 1..100) and date (only when given)      (with_retry)
-    #   response = list of items {"paper": {id, title, summary, upvotes, githubRepo, githubStars, publishedAt}, ...}
-    #   map every item to the record shape above (skip items without paper.id); url = https://huggingface.co/papers/<id>
-    #   keyword -> keep records whose title+summary contains it (case-insensitive); sort by upvotes descending
-    raise NotImplementedError("TODO 3: hf_daily_papers")
+    try:
+        params = {"limit": max(1, min(100, limit))}
+        if date:
+            params["date"] = date
+        records = _hf_records(HF_DAILY_URL, params, keyword=keyword)
+        records.sort(key=lambda record: record["upvotes"], reverse=True)
+        return json.dumps(records, ensure_ascii=False) if records else "NO RESULTS"
+    except Exception as exc:
+        return f"ERROR: {type(exc).__name__}: {exc}"
 
 
 @tool
 def hf_search_papers(query: str, limit: int = 10) -> str:
     """Search Hugging Face papers by topic. Returns a JSON list of
     {id, url, published, title, summary, upvotes, github, stars}."""
-    # PSEUDO-CODE:
-    #   GET HF_SEARCH_URL params: q=query, limit (clamp 1..50)                         (with_retry)
-    #   same item shape as the daily endpoint; prefer paper["ai_summary"] over paper["summary"] when present
-    raise NotImplementedError("TODO 3: hf_search_papers")
+    try:
+        records = _hf_records(HF_SEARCH_URL, {"q": query, "limit": max(1, min(50, limit))}, prefer_ai=True)
+        return json.dumps(records, ensure_ascii=False) if records else "NO RESULTS"
+    except Exception as exc:
+        return f"ERROR: {type(exc).__name__}: {exc}"
+
+
+def _exa_call(name, arguments, *, max_chars=None):
+    key = os.environ.get("EXA_API_KEY", "")
+    endpoint = httpx.URL(EXA_URL)
+    if key:
+        endpoint = endpoint.copy_add_param("exaApiKey", key)
+
+    def rate_limited(meta):
+        if isinstance(meta, dict):
+            for field, value in meta.items():
+                normalized = re.sub(r"[^a-z]", "", field.casefold())
+                if "ratelimit" in normalized and value not in (False, None, 0, "", "false"):
+                    return True
+                if rate_limited(value):
+                    return True
+        elif isinstance(meta, list):
+            return any(rate_limited(value) for value in meta)
+        elif isinstance(meta, str):
+            return bool(re.search(r"rate[ _-]*limit(?:ed|ing|exceeded)?", meta, re.I))
+        return False
+
+    def fetch():
+        response = httpx.post(
+            endpoint,
+            headers={"Accept": "application/json, text/event-stream"},
+            json={"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                  "params": {"name": name, "arguments": arguments}},
+            timeout=60.0,
+        )
+        response.raise_for_status()
+        if "text/event-stream" in response.headers.get("content-type", "") or response.text.lstrip().startswith("event:"):
+            messages = []
+            for event in re.split(r"\r?\n\r?\n", response.text):
+                lines = [line[5:].lstrip() for line in event.splitlines() if line.startswith("data:")]
+                if lines:
+                    messages.append(json.loads("\n".join(lines)))
+            message = next((item for item in reversed(messages) if "result" in item or "error" in item), None)
+            if message is None:
+                raise ValueError("Exa returned no JSON-RPC response")
+        else:
+            message = response.json()
+        if "error" in message:
+            raise RuntimeError(f"Exa JSON-RPC error: {message['error']}")
+        result = message["result"]
+        if rate_limited(result.get("_meta", {})):
+            raise RetryableError("Exa free-tier rate limited", retry_after=20.0)
+        text = "\n\n".join(item["text"] for item in result.get("content", []) if item.get("type") == "text")
+        if result.get("isError"):
+            raise RuntimeError(f"Exa tool error: {text}")
+        return text
+
+    try:
+        text = with_retry(fetch, attempts=7, cap=60.0)
+        return (text[:max_chars] if max_chars is not None else text) if text.strip() else "NO RESULTS"
+    except Exception as exc:
+        message = f"ERROR: {type(exc).__name__}: {exc}"
+        if key:
+            encoded_key = str(endpoint).split("exaApiKey=", 1)[1].split("&", 1)[0]
+            for secret in (key, encoded_key):
+                message = message.replace(secret, "[REDACTED]")
+        return message
 
 
 # ---- TODO 4: web search / fetch through the Exa MCP endpoint ----
 @tool
 def web_search(query: str, objective: str = "", num_results: int = 5) -> str:
     """Search the web (Exa). Describe the ideal page in natural language. Returns clean text of the top results with URLs."""
-    # PSEUDO-CODE:
-    #   call the MCP tool "web_search_exa" with arguments {query, objective, numResults}
-    #       (objective is REQUIRED by Exa: when empty, build one from the query)
-    #   see GUIDE.md part 1.4 for how to call an MCP server over plain HTTP (JSON-RPC "tools/call") and read the answer
-    #   read optional env EXA_API_KEY; when present it is sent to the Exa endpoint.
-    #       (see GUIDE.md 1.4 for where it goes) => the key then appears in exception text: redact it before returning "ERROR: ..."
-    #   WATCH OUT: read GUIDE.md 1.4 about how Exa signals "rate limited" on the free tier, and retry on it
-    raise NotImplementedError("TODO 4: web_search")
+    return _exa_call("web_search_exa", {
+        "query": query,
+        "objective": objective or f"Find reliable web sources about {query}",
+        "numResults": num_results,
+    })
 
 
 @tool
 def web_fetch(url: str) -> str:
     """Read the full content of one web page (e.g. an arXiv abstract page) as markdown. Long pages are truncated."""
-    # PSEUDO-CODE: MCP tool "web_fetch_exa" with arguments {"urls": [url]}; truncate the text to ~12000 chars
-    raise NotImplementedError("TODO 4: web_fetch")
+    return _exa_call("web_fetch_exa", {"urls": [url]}, max_chars=12000)
 
 
-# ---- TODO 5: registry (the researcher subagent gets exactly these) ----
+# The researcher receives exactly these host-side source tools.
 SOURCE_TOOLS = [arxiv_search, hf_daily_papers, hf_search_papers, web_search, web_fetch]
 
 
@@ -122,7 +269,4 @@ if __name__ == "__main__":
         ("web_search", web_search, {"query": "survey paper on world models", "num_results": 2}),
         ("web_fetch", web_fetch, {"url": "https://arxiv.org/abs/1803.10122"}),
     ]:
-        try:
-            print(f"== {name}\n{fn.invoke(args)[:400]}\n")
-        except NotImplementedError as exc:
-            print(f"== {name}: not implemented yet ({exc})\n")
+        print(f"== {name}\n{fn.invoke(args)[:400]}\n")
